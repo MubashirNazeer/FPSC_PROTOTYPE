@@ -1,0 +1,64 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  padding: 0.55rem 1rem;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: var(--fpsc-green);
+  color: var(--fpsc-white);
+  border-color: var(--fpsc-green);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--fpsc-green-light);
+  text-decoration: none;
+}
+
+.secondary {
+  background: var(--fpsc-white);
+  color: var(--fpsc-green);
+  border-color: var(--fpsc-border);
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--fpsc-green-light);
+  text-decoration: none;
+}
+
+.ghost {
+  background: transparent;
+  color: var(--fpsc-green);
+  border-color: transparent;
+}
+
+.ghost:hover:not(:disabled) {
+  background: rgba(11, 61, 46, 0.06);
+  text-decoration: none;
+}
+
+.gold {
+  background: var(--fpsc-gold);
+  color: var(--fpsc-ink);
+  border-color: #b8934a;
+}
+
+.gold:hover:not(:disabled) {
+  filter: brightness(0.97);
+  text-decoration: none;
+}

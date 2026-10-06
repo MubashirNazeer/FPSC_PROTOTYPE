@@ -1,0 +1,124 @@
+.layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  background: #eef2ef;
+}
+
+.sidebar {
+  background: var(--fpsc-green);
+  color: var(--fpsc-white);
+  display: flex;
+  flex-direction: column;
+  border-right: 3px solid var(--fpsc-gold);
+}
+
+.sideBrand {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 1.1rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sideBrand strong {
+  display: block;
+  font-family: var(--font-display);
+}
+
+.sideBrand small {
+  opacity: 0.8;
+  font-size: 0.75rem;
+}
+
+.mark {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 6px;
+  background: rgba(196, 163, 90, 0.2);
+  border: 1px solid var(--fpsc-gold);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+
+.sideNav {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.sideNav a {
+  color: rgba(255, 255, 255, 0.92);
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  text-decoration: none;
+}
+
+.sideNav a:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.active {
+  background: rgba(196, 163, 90, 0.22) !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.sideFooter {
+  padding: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.user {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.publicLink {
+  color: var(--fpsc-gold);
+  font-size: 0.82rem;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.topbar {
+  background: var(--fpsc-white);
+  border-bottom: 1px solid var(--fpsc-border);
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  color: var(--fpsc-green);
+  font-size: 0.92rem;
+}
+
+.main {
+  padding: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 3px solid var(--fpsc-gold);
+  }
+
+  .sideNav {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
