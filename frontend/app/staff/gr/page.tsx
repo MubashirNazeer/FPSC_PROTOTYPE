@@ -41,7 +41,41 @@ type Application = {
   roll_number?: string;
 };
 
-type Tab = "requisitions" | "ads" | "applications";
+type Appeal = {
+  id: number;
+  application: number;
+  tracking_id?: string;
+  candidate_name?: string;
+  reason?: string;
+  status: string;
+  decision_notes?: string;
+};
+
+type Hearing = {
+  id: number;
+  application: number;
+  tracking_id?: string;
+  scheduled_at?: string;
+  venue?: string;
+  outcome?: string;
+};
+
+type Attendance = {
+  id: number;
+  application: number;
+  tracking_id?: string;
+  exam_date?: string;
+  present?: boolean;
+  remarks?: string;
+};
+
+type Tab =
+  | "requisitions"
+  | "ads"
+  | "applications"
+  | "appeals"
+  | "hearings"
+  | "attendance";
 
 export default function StaffGrPage() {
   const { user, loading } = useAuthGuard({
@@ -54,6 +88,9 @@ export default function StaffGrPage() {
   const [reqs, setReqs] = useState<Requisition[]>([]);
   const [ads, setAds] = useState<Advertisement[]>([]);
   const [apps, setApps] = useState<Application[]>([]);
+  const [appeals, setAppeals] = useState<Appeal[]>([]);
+  const [hearings, setHearings] = useState<Hearing[]>([]);
+  const [attendance, setAttendance] = useState<Attendance[]>([]);
   const [reqForm, setReqForm] = useState({
     case_number: "",
     ministry: "",
@@ -72,16 +109,37 @@ export default function StaffGrPage() {
     close_date: "",
     consolidated_html: "",
   });
+  const [appealForm, setAppealForm] = useState({
+    application: "",
+    reason: "",
+  });
+  const [hearingForm, setHearingForm] = useState({
+    application: "",
+    scheduled_at: "",
+    venue: "FPSC HQ, Islamabad",
+  });
+  const [attForm, setAttForm] = useState({
+    application: "",
+    exam_date: new Date().toISOString().slice(0, 10),
+    present: true,
+    remarks: "",
+  });
 
   const load = async () => {
-    const [r, a, ap] = await Promise.all([
+    const [r, a, ap, aps, h, at] = await Promise.all([
       apiGet<Requisition[]>("/requisitions/"),
       apiGet<Advertisement[]>("/advertisements/"),
       apiGet<Application[]>("/applications/"),
+      apiGet<Appeal[]>("/appeals/"),
+      apiGet<Hearing[]>("/hearings/"),
+      apiGet<Attendance[]>("/attendance/"),
     ]);
     setReqs(Array.isArray(r.data) ? r.data : []);
     setAds(Array.isArray(a.data) ? a.data : []);
     setApps(Array.isArray(ap.data) ? ap.data : []);
+    setAppeals(Array.isArray(aps.data) ? aps.data : []);
+    setHearings(Array.isArray(h.data) ? h.data : []);
+    setAttendance(Array.isArray(at.data) ? at.data : []);
   };
 
   useEffect(() => {
@@ -90,6 +148,9 @@ export default function StaffGrPage() {
       setReqs([]);
       setAds([]);
       setApps([]);
+      setAppeals([]);
+      setHearings([]);
+      setAttendance([]);
     });
   }, [user]);
 
@@ -194,14 +255,101 @@ export default function StaffGrPage() {
     }
   }
 
+  async function fileAppeal(e: FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    setErr(null);
+    try {
+      await apiPost("/appeals/", {
+        application: Number(appealForm.application),
+        reason: appealForm.reason,
+      });
+      setMsg("Appeal filed.");
+      setAppealForm({ application: "", reason: "" });
+      await load();
+      setTab("appeals");
+    } catch (ex) {
+      setErr(ex instanceof Error ? ex.message : "Appeal failed.");
+    }
+  }
+
+  async function decideAppeal(id: number, status: string) {
+    setMsg(null);
+    setErr(null);
+    try {
+      await apiPost(`/appeals/${id}/decide/`, {
+        status,
+        decision_notes: `Decided as ${status} from GR console`,
+      });
+      setMsg(`Appeal #${id} → ${status}`);
+      await load();
+    } catch (ex) {
+      setErr(ex instanceof Error ? ex.message : "Decision failed.");
+    }
+  }
+
+  async function scheduleHearing(e: FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    setErr(null);
+    try {
+      await apiPost("/hearings/", {
+        application: Number(hearingForm.application),
+        scheduled_at: hearingForm.scheduled_at,
+        venue: hearingForm.venue,
+      });
+      setMsg("Personal hearing scheduled.");
+      setHearingForm({
+        application: "",
+        scheduled_at: "",
+        venue: "FPSC HQ, Islamabad",
+      });
+      await load();
+      setTab("hearings");
+    } catch (ex) {
+      setErr(ex instanceof Error ? ex.message : "Hearing failed.");
+    }
+  }
+
+  async function markAttendance(e: FormEvent) {
+    e.preventDefault();
+    setMsg(null);
+    setErr(null);
+    try {
+      await apiPost("/attendance/", {
+        application: Number(attForm.application),
+        exam_date: attForm.exam_date,
+        present: attForm.present,
+        remarks: attForm.remarks,
+      });
+      setMsg("Attendance recorded.");
+      setAttForm({
+        application: "",
+        exam_date: attForm.exam_date,
+        present: true,
+        remarks: "",
+      });
+      await load();
+      setTab("attendance");
+    } catch (ex) {
+      setErr(ex instanceof Error ? ex.message : "Attendance failed.");
+    }
+  }
+
   if (loading) return <div style={{ padding: "2rem" }}>Loading…</div>;
+
+  const appOptions = apps.map((a) => (
+    <option key={a.id} value={a.id}>
+      {a.tracking_id || `#${a.id}`} — {a.candidate_name || "Candidate"}
+    </option>
+  ));
 
   return (
     <StaffShell userLabel={user?.username}>
       <h1 className="page-title">GR — General Recruitment Management</h1>
       <p className={styles.help}>
-        Requisition → advertisement → applications → admit cards / scrutiny
-        (RFP Module 1).
+        Requisition → advertisement → applications → scrutiny → appeals /
+        hearings → attendance / admit cards (RFP Module 1).
       </p>
       {msg ? <div className="alert alert-success">{msg}</div> : null}
       {err ? <div className="alert alert-error">{err}</div> : null}
@@ -212,6 +360,9 @@ export default function StaffGrPage() {
             ["requisitions", "Requisitions"],
             ["ads", "Advertisements"],
             ["applications", "Applications"],
+            ["appeals", "Appeals"],
+            ["hearings", "Hearings"],
+            ["attendance", "Attendance"],
           ] as const
         ).map(([key, label]) => (
           <button
@@ -509,6 +660,260 @@ export default function StaffGrPage() {
               },
             ]}
           />
+        </div>
+      ) : null}
+
+      {tab === "appeals" ? (
+        <div className="stack">
+          <div className="card stack">
+            <h3>File appeal / restoration</h3>
+            <form className="stack" onSubmit={fileAppeal}>
+              <div className={styles.formGrid}>
+                <div className="form-field">
+                  <label>Application</label>
+                  <select
+                    required
+                    value={appealForm.application}
+                    onChange={(e) =>
+                      setAppealForm({ ...appealForm, application: e.target.value })
+                    }
+                  >
+                    <option value="">Select…</option>
+                    {appOptions}
+                  </select>
+                </div>
+              </div>
+              <div className="form-field">
+                <label>Reason</label>
+                <textarea
+                  required
+                  rows={3}
+                  value={appealForm.reason}
+                  onChange={(e) =>
+                    setAppealForm({ ...appealForm, reason: e.target.value })
+                  }
+                />
+              </div>
+              <Button type="submit">File appeal</Button>
+            </form>
+          </div>
+          <div className="card">
+            <h3>Appeals register</h3>
+            <DataTable<Appeal>
+              rows={appeals}
+              getRowKey={(r) => r.id}
+              columns={[
+                {
+                  key: "tracking_id",
+                  header: "Tracking",
+                  render: (r) => r.tracking_id || String(r.application),
+                },
+                {
+                  key: "candidate_name",
+                  header: "Candidate",
+                  render: (r) => r.candidate_name || "—",
+                },
+                {
+                  key: "reason",
+                  header: "Reason",
+                  render: (r) =>
+                    (r.reason || "").slice(0, 60) +
+                    ((r.reason || "").length > 60 ? "…" : ""),
+                },
+                {
+                  key: "status",
+                  header: "Status",
+                  render: (r) => <StatusBadge status={r.status} />,
+                },
+                {
+                  key: "actions",
+                  header: "Decide",
+                  render: (r) =>
+                    r.status === "FILED" || r.status === "UNDER_REVIEW" ? (
+                      <span className={styles.actions}>
+                        <Button
+                          variant="secondary"
+                          onClick={() => decideAppeal(r.id, "ACCEPTED")}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => decideAppeal(r.id, "RESTORED")}
+                        >
+                          Restore
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          onClick={() => decideAppeal(r.id, "REJECTED")}
+                        >
+                          Reject
+                        </Button>
+                      </span>
+                    ) : (
+                      "—"
+                    ),
+                },
+              ]}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {tab === "hearings" ? (
+        <div className="stack">
+          <div className="card stack">
+            <h3>Schedule personal hearing</h3>
+            <form className={styles.formGrid} onSubmit={scheduleHearing}>
+              <div className="form-field">
+                <label>Application</label>
+                <select
+                  required
+                  value={hearingForm.application}
+                  onChange={(e) =>
+                    setHearingForm({ ...hearingForm, application: e.target.value })
+                  }
+                >
+                  <option value="">Select…</option>
+                  {appOptions}
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Date & time</label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={hearingForm.scheduled_at}
+                  onChange={(e) =>
+                    setHearingForm({ ...hearingForm, scheduled_at: e.target.value })
+                  }
+                />
+              </div>
+              <div className="form-field">
+                <label>Venue</label>
+                <input
+                  value={hearingForm.venue}
+                  onChange={(e) =>
+                    setHearingForm({ ...hearingForm, venue: e.target.value })
+                  }
+                />
+              </div>
+              <div className="form-field" style={{ alignSelf: "end" }}>
+                <Button type="submit">Schedule</Button>
+              </div>
+            </form>
+          </div>
+          <div className="card">
+            <h3>Hearings diary</h3>
+            <DataTable<Hearing>
+              rows={hearings}
+              getRowKey={(r) => r.id}
+              columns={[
+                {
+                  key: "tracking_id",
+                  header: "Tracking",
+                  render: (r) => r.tracking_id || String(r.application),
+                },
+                {
+                  key: "scheduled_at",
+                  header: "When",
+                  render: (r) =>
+                    r.scheduled_at
+                      ? new Date(r.scheduled_at).toLocaleString()
+                      : "—",
+                },
+                { key: "venue", header: "Venue" },
+                {
+                  key: "outcome",
+                  header: "Outcome",
+                  render: (r) => r.outcome || "Pending",
+                },
+              ]}
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {tab === "attendance" ? (
+        <div className="stack">
+          <div className="card stack">
+            <h3>Mark exam attendance</h3>
+            <form className={styles.formGrid} onSubmit={markAttendance}>
+              <div className="form-field">
+                <label>Application</label>
+                <select
+                  required
+                  value={attForm.application}
+                  onChange={(e) =>
+                    setAttForm({ ...attForm, application: e.target.value })
+                  }
+                >
+                  <option value="">Select…</option>
+                  {appOptions}
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Exam date</label>
+                <input
+                  type="date"
+                  required
+                  value={attForm.exam_date}
+                  onChange={(e) =>
+                    setAttForm({ ...attForm, exam_date: e.target.value })
+                  }
+                />
+              </div>
+              <div className="form-field">
+                <label>Present</label>
+                <select
+                  value={attForm.present ? "yes" : "no"}
+                  onChange={(e) =>
+                    setAttForm({ ...attForm, present: e.target.value === "yes" })
+                  }
+                >
+                  <option value="yes">Present</option>
+                  <option value="no">Absent</option>
+                </select>
+              </div>
+              <div className="form-field">
+                <label>Remarks</label>
+                <input
+                  value={attForm.remarks}
+                  onChange={(e) =>
+                    setAttForm({ ...attForm, remarks: e.target.value })
+                  }
+                />
+              </div>
+              <div className="form-field" style={{ alignSelf: "end" }}>
+                <Button type="submit">Save attendance</Button>
+              </div>
+            </form>
+          </div>
+          <div className="card">
+            <h3>Attendance register</h3>
+            <DataTable<Attendance>
+              rows={attendance}
+              getRowKey={(r) => r.id}
+              columns={[
+                {
+                  key: "tracking_id",
+                  header: "Tracking",
+                  render: (r) => r.tracking_id || String(r.application),
+                },
+                { key: "exam_date", header: "Date" },
+                {
+                  key: "present",
+                  header: "Status",
+                  render: (r) => (r.present ? "Present" : "Absent"),
+                },
+                {
+                  key: "remarks",
+                  header: "Remarks",
+                  render: (r) => r.remarks || "—",
+                },
+              ]}
+            />
+          </div>
         </div>
       ) : null}
     </StaffShell>

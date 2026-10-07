@@ -63,6 +63,18 @@ class ExaminerPanelViewSet(viewsets.ModelViewSet):
         obj = ser.save()
         return success_response(self.get_serializer(obj).data, "Created", 201)
 
+    @action(detail=True, methods=["post"])
+    def approve(self, request, pk=None):
+        from django.utils import timezone
+
+        panel = self.get_object()
+        panel.commission_approved = True
+        panel.approved_at = timezone.now()
+        panel.save(update_fields=["commission_approved", "approved_at"])
+        return success_response(
+            ExaminerPanelSerializer(panel).data, "Panel commission-approved"
+        )
+
 
 class CECandidateProgressViewSet(viewsets.ModelViewSet):
     queryset = CECandidateProgress.objects.select_related("candidate", "cycle").all()

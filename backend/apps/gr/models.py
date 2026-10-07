@@ -183,3 +183,51 @@ class Nomination(models.Model):
     issued_at = models.DateField()
     remarks = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Appeal(models.Model):
+    """GR appeal / restoration processing."""
+
+    class Status(models.TextChoices):
+        FILED = "FILED", "Filed"
+        UNDER_REVIEW = "UNDER_REVIEW", "Under Review"
+        ACCEPTED = "ACCEPTED", "Accepted"
+        REJECTED = "REJECTED", "Rejected"
+        RESTORED = "RESTORED", "Restored"
+
+    application = models.ForeignKey(
+        Application, on_delete=models.CASCADE, related_name="appeals"
+    )
+    reason = models.TextField()
+    status = models.CharField(
+        max_length=32, choices=Status.choices, default=Status.FILED
+    )
+    decision_notes = models.TextField(blank=True)
+    filed_at = models.DateTimeField(auto_now_add=True)
+    decided_at = models.DateTimeField(null=True, blank=True)
+
+
+class PersonalHearing(models.Model):
+    application = models.ForeignKey(
+        Application, on_delete=models.CASCADE, related_name="hearings"
+    )
+    scheduled_at = models.DateTimeField()
+    venue = models.CharField(max_length=255, blank=True)
+    outcome = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class AttendanceRecord(models.Model):
+    application = models.ForeignKey(
+        Application, on_delete=models.CASCADE, related_name="attendance"
+    )
+    exam_date = models.DateField()
+    present = models.BooleanField(default=False)
+    remarks = models.CharField(max_length=255, blank=True)
+    marked_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name="attendance_marked",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)

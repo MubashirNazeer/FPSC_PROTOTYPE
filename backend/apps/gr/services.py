@@ -197,28 +197,108 @@ def assign_roll_and_admit(*, application: Application, centre: ExamCentre | None
 
 
 def run_scrutiny(*, application: Application, user) -> Application:
-    """Configurable rule-engine stub for document/CV scoring."""
+    """
+    Rule-based automated scrutiny (GR-1.7 / UEM-3.6 / CC-03).
+    Configurable weights via advertisement metadata or defaults.
+    """
     profile = getattr(application.candidate, "candidate_profile", None)
-    score = 50.0
-    notes = []
-    if profile:
-        if profile.education_summary:
-            score += 20
-            notes.append("Education provided")
-        if profile.experience_summary:
-            score += 15
-            notes.append("Experience provided")
-        if profile.domicile:
-            score += 10
-            notes.append("Domicile present")
-        if profile.quota:
-            score += 5
+    docs = application.documents or {}
+    rules = {
+        "education": 20,
+        "experience": 15,
+        "domicile": 10,
+        "quota": 5,
+        "cnic_doc": 10,
+        "degree_doc": 15,
+        "age_ok": 10,
+        "base": 15,
+    }
+    ad_meta = {}
+    if application.advertisement_id:
+        # optional future: store rules on advertisement
+        ad_meta = getattr(application.advertisement, "metadata", None) or {}
+    if isinstance(ad_meta, dict) and ad_meta.get("scrutiny_weights"):
+        rules.update(ad_meta["scrutiny_weights"])
+
+    score = float(rules.get("base", 15))
+    notes: list[str] = []
+    fails: list[str] = []
+
+    if profile and profile.education_summary:
+        score += rules["education"]
+        notes.append("Education summary present")
+    else:
+        fails.append("Missing education summary")
+
+    if profile and profile.experience_summary:
+        score += rules["experience"]
+        notes.append("Experience summary present")
+    else:
+        fails.append("Missing experience")
+
+    if profile and profile.domicile:
+        score += rules["domicile"]
+        notes.append(f"Domicile: {profile.domicile}")
+    else:
+        fails.append("Domicile not declared")
+
+    if profile and profile.quota:
+        score += rules["quota"]
+        notes.append(f"Quota: {profile.quota}")
+
+    if docs.get("cnic") or docs.get("CNIC"):
+        score += rules["cnic_doc"]
+        notes.append("CNIC document uploaded")
+    else:
+        fails.append("CNIC document missing")
+
+    if docs.get("degree") or docs.get("Degree"):
+        score += rules["degree_doc"]
+        notes.append("Degree document uploaded")
+    else:
+        fails.append("Degree document missing")
+
+    # Age gate: if DOB present and age between 18–40 (configurable stub)
+    if profile and profile.date_of_birth:
+        from datetime import date as date_cls
+
+        today = date_cls.today()
+        age = (
+            today.year
+            - profile.date_of_birth.year
+            - (
+                (today.month, today.day)
+                < (profile.date_of_birth.month, profile.date_of_birth.day)
+            )
+        )
+        if 18 <= age <= 40:
+            score += rules["age_ok"]
+            notes.append(f"Age OK ({age})")
+        else:
+            fails.append(f"Age out of range ({age})")
+
+    # CNIC format check on user
+    cnic = (application.candidate.cnic or "").replace("-", "")
+    if len(cnic) == 13 and cnic.isdigit():
+        notes.append("CNIC format valid")
+    else:
+        fails.append("Invalid CNIC format")
+        score = max(0, score - 10)
+
     application.scrutiny_score = min(score, 100)
-    application.scrutiny_notes = "; ".join(notes) or "Basic check"
+    application.scrutiny_notes = (
+        "PASS: " + "; ".join(notes) if notes else "No positives"
+    )
+    if fails:
+        application.scrutiny_notes += " | FAIL: " + "; ".join(fails)
     application.status = (
         Application.Status.SHORTLISTED
-        if application.scrutiny_score >= 60
+        if application.scrutiny_score >= 60 and not (
+            "Invalid CNIC format" in fails and application.scrutiny_score < 70
+        )
         else Application.Status.REJECTED
+        if application.scrutiny_score < 60
+        else Application.Status.SHORTLISTED
     )
     application.save()
     write_audit(
@@ -226,6 +306,10 @@ def run_scrutiny(*, application: Application, user) -> Application:
         action="SCRUTINY",
         entity_type="Application",
         entity_id=application.pk,
-        detail={"score": float(application.scrutiny_score), "status": application.status},
+        detail={
+            "score": float(application.scrutiny_score),
+            "status": application.status,
+            "fails": fails,
+        },
     )
     return application

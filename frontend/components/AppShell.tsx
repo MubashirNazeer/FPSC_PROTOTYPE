@@ -20,10 +20,11 @@ export function AppShell({ children }: Props) {
               <small>Government of Pakistan</small>
             </span>
           </Link>
-          <nav className={styles.nav}>
+          <nav className={styles.nav} aria-label="Primary">
             <Link href="/about">About</Link>
             <Link href="/ads">Advertisements</Link>
             <Link href="/flows">Process Flows</Link>
+            <Link href="/search">Search</Link>
             <Link href="/contact">Contact</Link>
             <Button href="/portal/login" variant="primary">
               Candidate Portal
@@ -36,10 +37,39 @@ export function AppShell({ children }: Props) {
       </header>
       <main className={styles.main}>{children}</main>
       <footer className={styles.footer}>
-        <div className="container">
+        <div className="container" style={{ display: "grid", gap: "0.5rem" }}>
           <p>
             © {new Date().getFullYear()} Federal Public Service Commission —
-            Digitalization ERP (MVP Demo)
+            Aga Khan Road, F-5/1, Islamabad
+          </p>
+          <p style={{ margin: 0 }}>
+            Follow:{" "}
+            <a
+              href="https://www.facebook.com/FPSC.gov.pk"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Facebook
+            </a>
+            {" · "}
+            <a
+              href="https://twitter.com/FPSC_Official"
+              target="_blank"
+              rel="noreferrer"
+            >
+              X / Twitter
+            </a>
+            {" · "}
+            <a href="https://www.fpsc.gov.pk" target="_blank" rel="noreferrer">
+              fpsc.gov.pk
+            </a>
+            {" · "}
+            <Link href="/ads">Advertisements</Link>
+            {" · "}
+            <Link href="/search">Search</Link>
+          </p>
+          <p style={{ margin: 0, fontSize: "0.8rem" }}>
+            Analytics: set NEXT_PUBLIC_GA_ID for Google Analytics (WEB-4.10).
           </p>
         </div>
       </footer>

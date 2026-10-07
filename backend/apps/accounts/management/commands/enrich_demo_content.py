@@ -6,7 +6,8 @@ from datetime import date, timedelta
 from django.core.management.base import BaseCommand
 
 from apps.cms.models import NewsItem, Page
-from apps.gr.models import Advertisement
+from apps.gr.models import Advertisement, Appeal, Application, PersonalHearing
+from apps.notifications.models import NotificationTemplate
 
 
 GR_HTML = """
@@ -175,4 +176,57 @@ class Command(BaseCommand):
                 "is_published": True,
             },
         )
-        self.stdout.write(self.style.SUCCESS(f"Enriched ads/news (primary GR ad id={ad.pk})"))
+        templates = [
+            (
+                "APP_SUBMITTED",
+                "EMAIL",
+                "Application received — {tracking_id}",
+                "Dear {name}, your application {tracking_id} for {exam} has been received.",
+            ),
+            (
+                "FEE_PAID",
+                "SMS",
+                "Fee paid",
+                "FPSC: Fee confirmed for {tracking_id}. Download admit card from portal.",
+            ),
+            (
+                "UEM_INTIMATION",
+                "EMAIL",
+                "FPSC examination update",
+                "Dear {name}, update regarding {exam}. Tracking: {tracking_id}.",
+            ),
+            (
+                "ADMIT_ISSUED",
+                "EMAIL",
+                "Admit card issued",
+                "Dear {name}, admit card for {tracking_id} is available on the candidate portal.",
+            ),
+        ]
+        for code, channel, subject, body in templates:
+            NotificationTemplate.objects.update_or_create(
+                code=code,
+                defaults={
+                    "channel": channel,
+                    "subject": subject,
+                    "body": body,
+                    "is_active": True,
+                },
+            )
+        app = Application.objects.order_by("id").first()
+        if app:
+            Appeal.objects.get_or_create(
+                application=app,
+                reason="Request restoration after provisional rejection — documents uploaded late.",
+                defaults={"status": Appeal.Status.FILED},
+            )
+            from django.utils import timezone
+
+            PersonalHearing.objects.get_or_create(
+                application=app,
+                venue="FPSC HQ Hearing Room-1",
+                defaults={
+                    "scheduled_at": timezone.now() + timedelta(days=14),
+                    "outcome": "",
+                },
+            )
+        self.stdout.write(self.style.SUCCESS(f"Enriched ads/news/templates (primary GR ad id={ad.pk})"))

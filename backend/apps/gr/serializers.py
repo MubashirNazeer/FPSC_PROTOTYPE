@@ -3,10 +3,13 @@ from rest_framework import serializers
 from .models import (
     AdmitCard,
     Advertisement,
+    Appeal,
     Application,
+    AttendanceRecord,
     ExamCentre,
     InterviewPanel,
     Nomination,
+    PersonalHearing,
     Requisition,
 )
 
@@ -107,3 +110,41 @@ class ApplySerializer(serializers.Serializer):
 
 class AdvanceRequisitionSerializer(serializers.Serializer):
     note = serializers.CharField(required=False, allow_blank=True)
+
+
+class AppealSerializer(serializers.ModelSerializer):
+    tracking_id = serializers.CharField(
+        source="application.tracking_id", read_only=True
+    )
+    candidate_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Appeal
+        fields = "__all__"
+
+    def get_candidate_name(self, obj):
+        user = getattr(obj.application, "candidate", None)
+        if not user:
+            return ""
+        return user.get_full_name() or user.username
+
+
+class PersonalHearingSerializer(serializers.ModelSerializer):
+    tracking_id = serializers.CharField(
+        source="application.tracking_id", read_only=True
+    )
+
+    class Meta:
+        model = PersonalHearing
+        fields = "__all__"
+
+
+class AttendanceRecordSerializer(serializers.ModelSerializer):
+    tracking_id = serializers.CharField(
+        source="application.tracking_id", read_only=True
+    )
+
+    class Meta:
+        model = AttendanceRecord
+        fields = "__all__"
+        read_only_fields = ("marked_by",)

@@ -2,6 +2,17 @@ from django.conf import settings
 from django.db import models
 
 
+class NotificationTemplate(models.Model):
+    code = models.CharField(max_length=64, unique=True)
+    channel = models.CharField(max_length=16, default="EMAIL")
+    subject = models.CharField(max_length=255)
+    body = models.TextField(
+        help_text="Supports {name}, {tracking_id}, {exam} placeholders"
+    )
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class NotificationOutbox(models.Model):
     class Channel(models.TextChoices):
         EMAIL = "EMAIL", "Email"

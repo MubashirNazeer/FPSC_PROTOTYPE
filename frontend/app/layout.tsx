@@ -16,9 +16,30 @@ const ui = Source_Sans_3({
 });
 
 export const metadata: Metadata = {
-  title: "Federal Public Service Commission — Digital ERP",
+  title: {
+    default: "Federal Public Service Commission (FPSC) — Official Digital Portal",
+    template: "%s | FPSC Pakistan",
+  },
   description:
-    "FPSC digitalization platform: public information, candidate portal, staff EMS, and CBT.",
+    "Official FPSC digital platform for consolidated advertisements, candidate applications, CSS/MPT, CBT, and recruitment workflows. Government of Pakistan.",
+  keywords: [
+    "FPSC",
+    "Federal Public Service Commission",
+    "CSS",
+    "MPT",
+    "General Recruitment",
+    "jobs Pakistan",
+    "CBT",
+  ],
+  authors: [{ name: "Federal Public Service Commission" }],
+  openGraph: {
+    title: "Federal Public Service Commission",
+    description:
+      "Apply online, download admit cards, and track FPSC examinations.",
+    locale: "en_PK",
+    type: "website",
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({

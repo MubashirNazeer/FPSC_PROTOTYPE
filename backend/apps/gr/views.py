@@ -5,23 +5,31 @@ from rest_framework.exceptions import ValidationError
 from apps.accounts.exceptions import success_response
 from apps.accounts.permissions import IsCandidate, IsStaffUser
 
+from django.utils import timezone
+
 from .models import (
     AdmitCard,
     Advertisement,
+    Appeal,
     Application,
+    AttendanceRecord,
     ExamCentre,
     InterviewPanel,
     Nomination,
+    PersonalHearing,
     Requisition,
 )
 from .serializers import (
     AdmitCardSerializer,
     AdvertisementSerializer,
+    AppealSerializer,
     ApplicationSerializer,
     ApplySerializer,
+    AttendanceRecordSerializer,
     ExamCentreSerializer,
     InterviewPanelSerializer,
     NominationSerializer,
+    PersonalHearingSerializer,
     RequisitionSerializer,
 )
 from .services import (
@@ -247,3 +255,74 @@ class InterviewPanelViewSet(viewsets.ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         return success_response(self.get_serializer(self.get_queryset(), many=True).data)
+
+    def create(self, request, *args, **kwargs):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        obj = ser.save()
+        return success_response(self.get_serializer(obj).data, "Created", 201)
+
+
+class AppealViewSet(viewsets.ModelViewSet):
+    queryset = Appeal.objects.select_related("application").all()
+    serializer_class = AppealSerializer
+    permission_classes = [IsStaffUser]
+    filterset_fields = ["status", "application"]
+
+    def list(self, request, *args, **kwargs):
+        return success_response(
+            self.get_serializer(self.filter_queryset(self.get_queryset()), many=True).data
+        )
+
+    def create(self, request, *args, **kwargs):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        obj = ser.save()
+        return success_response(self.get_serializer(obj).data, "Appeal filed", 201)
+
+    @action(detail=True, methods=["post"])
+    def decide(self, request, pk=None):
+        appeal = self.get_object()
+        status = request.data.get("status", Appeal.Status.REJECTED)
+        appeal.status = status
+        appeal.decision_notes = request.data.get("decision_notes", "")
+        appeal.decided_at = timezone.now()
+        appeal.save()
+        if status in (Appeal.Status.ACCEPTED, Appeal.Status.RESTORED):
+            app = appeal.application
+            app.status = Application.Status.UNDER_SCRUTINY
+            app.save(update_fields=["status"])
+        return success_response(AppealSerializer(appeal).data, "Appeal decided")
+
+
+class PersonalHearingViewSet(viewsets.ModelViewSet):
+    queryset = PersonalHearing.objects.select_related("application").all()
+    serializer_class = PersonalHearingSerializer
+    permission_classes = [IsStaffUser]
+
+    def list(self, request, *args, **kwargs):
+        return success_response(self.get_serializer(self.get_queryset(), many=True).data)
+
+    def create(self, request, *args, **kwargs):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        obj = ser.save()
+        return success_response(self.get_serializer(obj).data, "Hearing scheduled", 201)
+
+
+class AttendanceRecordViewSet(viewsets.ModelViewSet):
+    queryset = AttendanceRecord.objects.select_related("application").all()
+    serializer_class = AttendanceRecordSerializer
+    permission_classes = [IsStaffUser]
+    filterset_fields = ["exam_date", "present"]
+
+    def list(self, request, *args, **kwargs):
+        return success_response(
+            self.get_serializer(self.filter_queryset(self.get_queryset()), many=True).data
+        )
+
+    def create(self, request, *args, **kwargs):
+        ser = self.get_serializer(data=request.data)
+        ser.is_valid(raise_exception=True)
+        obj = ser.save(marked_by=request.user)
+        return success_response(self.get_serializer(obj).data, "Attendance marked", 201)

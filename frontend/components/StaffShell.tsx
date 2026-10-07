@@ -18,6 +18,7 @@ const NAV = [
   { href: "/staff/cbt", label: "CBT Management" },
   { href: "/staff/supporting", label: "Supporting Mgmt" },
   { href: "/staff/cms", label: "CMS Management" },
+  { href: "/staff/notifications", label: "Notifications" },
 ];
 
 type Props = {
