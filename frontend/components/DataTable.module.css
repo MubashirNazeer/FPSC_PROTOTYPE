@@ -20,8 +20,8 @@
 }
 
 .table th {
-  background: #f0f4f2;
-  color: var(--fpsc-green);
+  background: var(--fpsc-green-soft);
+  color: var(--fpsc-green-dark);
   font-weight: 700;
   font-size: 0.78rem;
   text-transform: uppercase;
@@ -29,7 +29,7 @@
 }
 
 .table tbody tr:hover {
-  background: rgba(11, 61, 46, 0.03);
+  background: var(--fpsc-green-soft);
 }
 
 .table tbody tr:last-child td {

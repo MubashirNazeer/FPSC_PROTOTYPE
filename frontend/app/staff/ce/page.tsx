@@ -10,9 +10,10 @@ import { apiGet } from "@/lib/api";
 
 type CeCycle = {
   id: number;
-  name?: string;
   year?: number;
-  status: string;
+  title?: string;
+  phase?: string;
+  phase_display?: string;
 };
 
 export default function StaffCePage() {
@@ -33,17 +34,19 @@ export default function StaffCePage() {
 
   return (
     <StaffShell userLabel={user?.username}>
-      <h1 className="page-title">Competitive Examination cycles</h1>
+      <h1 className="page-title">Competitive Examination (CSS)</h1>
       <DataTable<CeCycle>
         rows={rows}
         getRowKey={(r) => r.id}
         columns={[
-          { key: "name", header: "Cycle" },
           { key: "year", header: "Year" },
+          { key: "title", header: "Title" },
           {
-            key: "status",
-            header: "Status",
-            render: (r) => <StatusBadge status={r.status} />,
+            key: "phase",
+            header: "Phase",
+            render: (r) => (
+              <StatusBadge status={r.phase_display || r.phase} />
+            ),
           },
         ]}
       />

@@ -12,8 +12,8 @@ type ExamType = { id: number; code?: string; name?: string };
 type UemExam = {
   id: number;
   title?: string;
-  status: string;
-  exam_type?: number;
+  current_stage?: string;
+  exam_type_name?: string;
 };
 
 export default function StaffUemPage() {
@@ -64,10 +64,11 @@ export default function StaffUemPage() {
             getRowKey={(r) => r.id}
             columns={[
               { key: "title", header: "Title" },
+              { key: "exam_type_name", header: "Type" },
               {
-                key: "status",
-                header: "Status",
-                render: (r) => <StatusBadge status={r.status} />,
+                key: "current_stage",
+                header: "Stage",
+                render: (r) => <StatusBadge status={r.current_stage} />,
               },
             ]}
           />

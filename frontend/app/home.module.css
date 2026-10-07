@@ -1,35 +1,30 @@
 .hero {
-  background: linear-gradient(
-    135deg,
-    rgba(11, 61, 46, 0.95) 0%,
-    rgba(20, 90, 67, 0.92) 55%,
-    rgba(11, 61, 46, 0.98) 100%
-  );
-  color: var(--fpsc-white);
-  padding: 3.5rem 0 3rem;
-  margin-bottom: 2rem;
-  border-bottom: 4px solid var(--fpsc-gold);
+  background: #ffffff;
+  color: var(--fpsc-ink);
+  padding: 3rem 0 2.5rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--fpsc-border);
 }
 
 .kicker {
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.78rem;
-  color: var(--fpsc-gold);
+  font-size: 0.75rem;
+  color: var(--fpsc-green);
   margin: 0 0 0.75rem;
   font-weight: 700;
 }
 
 .hero h1 {
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: clamp(1.85rem, 4vw, 2.55rem);
   max-width: 18ch;
-  color: var(--fpsc-white);
+  color: var(--fpsc-green-dark);
 }
 
 .lead {
-  max-width: 58ch;
+  max-width: 60ch;
   font-size: 1.05rem;
-  opacity: 0.92;
+  color: var(--fpsc-muted);
   margin: 1rem 0 1.5rem;
 }
 
@@ -47,13 +42,34 @@
 }
 
 .sectionHead h2 {
-  color: var(--fpsc-green);
+  color: var(--fpsc-ink);
 }
 
 .newsMeta {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--fpsc-muted);
+  color: var(--fpsc-green);
+  font-weight: 700;
   margin: 0 0 0.35rem;
+}
+
+.flowStrip {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  margin-top: 0.5rem;
+}
+
+.flowCard img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--fpsc-border);
+  background: #fff;
+}
+
+.flowCard h3 {
+  font-size: 1rem;
+  margin-top: 0.75rem;
 }

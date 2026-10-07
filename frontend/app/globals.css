@@ -1,16 +1,19 @@
 :root {
-  --fpsc-green: #0b3d2e;
-  --fpsc-green-light: #145a43;
-  --fpsc-gold: #c4a35a;
-  --fpsc-cream: #f7f4ef;
-  --fpsc-ink: #1a1a1a;
-  --fpsc-muted: #5c6b63;
-  --fpsc-border: #d8ddd9;
+  --fpsc-green: #0d6b4c;
+  --fpsc-green-dark: #0a4f39;
+  --fpsc-green-soft: #e8f5ef;
+  --fpsc-green-mid: #1a8f66;
+  --fpsc-ink: #1c2430;
+  --fpsc-muted: #5a6570;
+  --fpsc-border: #e2e8e6;
+  --fpsc-border-strong: #c5d0cb;
   --fpsc-white: #ffffff;
-  --radius: 6px;
-  --shadow: 0 8px 24px rgba(11, 61, 46, 0.08);
-  --font-display: "Libre Baskerville", Georgia, serif;
-  --font-ui: "Source Sans 3", system-ui, sans-serif;
+  --fpsc-bg: #f5f7f6;
+  --fpsc-gold: #b8860b;
+  --radius: 8px;
+  --shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+  --font-display: "Libre Baskerville", Georgia, "Times New Roman", serif;
+  --font-ui: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
 }
 
 *,
@@ -25,10 +28,10 @@ body {
   padding: 0;
   min-height: 100%;
   color: var(--fpsc-ink);
-  background: var(--fpsc-cream);
+  background: var(--fpsc-bg);
   font-family: var(--font-ui);
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 h1,
@@ -39,39 +42,29 @@ h4 {
   font-weight: 700;
   line-height: 1.25;
   margin: 0 0 0.5rem;
+  color: var(--fpsc-ink);
+}
+
+p {
+  margin: 0 0 0.75rem;
 }
 
 a {
-  color: var(--fpsc-green-light);
+  color: var(--fpsc-green);
   text-decoration: none;
 }
 
 a:hover {
+  color: var(--fpsc-green-dark);
   text-decoration: underline;
 }
 
 .fpsc-pattern {
-  background-color: var(--fpsc-cream);
-  background-image:
-    radial-gradient(
-      circle at 20% 10%,
-      rgba(196, 163, 90, 0.12) 0%,
-      transparent 45%
-    ),
-    radial-gradient(
-      circle at 80% 0%,
-      rgba(20, 90, 67, 0.1) 0%,
-      transparent 40%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(11, 61, 46, 0.04) 0%,
-      transparent 120px
-    );
+  background: var(--fpsc-bg);
 }
 
 .container {
-  width: min(1120px, 92vw);
+  width: min(1140px, 92vw);
   margin: 0 auto;
 }
 
@@ -88,13 +81,13 @@ a:hover {
 }
 
 .page-title {
-  font-size: 1.75rem;
-  color: var(--fpsc-green);
+  font-size: 1.65rem;
+  color: var(--fpsc-ink);
 }
 
 .page-lead {
   color: var(--fpsc-muted);
-  max-width: 52ch;
+  max-width: 58ch;
   margin-bottom: 1.5rem;
 }
 
@@ -119,22 +112,25 @@ a:hover {
 .form-field label {
   font-weight: 600;
   font-size: 0.9rem;
+  color: var(--fpsc-ink);
 }
 
 .form-field input,
 .form-field select,
 .form-field textarea {
-  border: 1px solid var(--fpsc-border);
+  border: 1px solid var(--fpsc-border-strong);
   border-radius: var(--radius);
-  padding: 0.55rem 0.75rem;
+  padding: 0.6rem 0.75rem;
   font: inherit;
+  background: var(--fpsc-white);
+  color: var(--fpsc-ink);
 }
 
 .form-field input:focus,
 .form-field select:focus,
 .form-field textarea:focus {
-  outline: 2px solid rgba(20, 90, 67, 0.35);
-  border-color: var(--fpsc-green-light);
+  outline: 2px solid rgba(13, 107, 76, 0.25);
+  border-color: var(--fpsc-green);
 }
 
 .alert {
@@ -144,31 +140,39 @@ a:hover {
 }
 
 .alert-error {
-  background: #fdecea;
-  border: 1px solid #f5c2c0;
-  color: #7a1c18;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
 }
 
 .alert-info {
-  background: #eef6f2;
-  border: 1px solid #c5ddd2;
-  color: var(--fpsc-green);
+  background: var(--fpsc-green-soft);
+  border: 1px solid #b7e0cc;
+  color: var(--fpsc-green-dark);
 }
 
 .alert-success {
-  background: #edf7ef;
-  border: 1px solid #b9dfc0;
-  color: #1f5c32;
+  background: #ecfdf3;
+  border: 1px solid #abefc6;
+  color: #085d3a;
 }
 
+/* CBT keeps a focused dark exam chrome */
 .exam-shell {
   min-height: 100vh;
-  background: #0f1412;
+  background: #101816;
   color: #eef2ef;
 }
 
 .exam-shell .card {
-  background: #161c19;
-  border-color: #2a3530;
+  background: #18221e;
+  border-color: #2d3b35;
+  color: #eef2ef;
+  box-shadow: none;
+}
+
+.exam-shell h1,
+.exam-shell h2,
+.exam-shell h3 {
   color: #eef2ef;
 }

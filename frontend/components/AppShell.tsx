@@ -23,8 +23,11 @@ export function AppShell({ children }: Props) {
           <nav className={styles.nav}>
             <Link href="/about">About</Link>
             <Link href="/ads">Advertisements</Link>
+            <Link href="/flows">Process Flows</Link>
             <Link href="/contact">Contact</Link>
-            <Link href="/portal/login">Candidate Portal</Link>
+            <Button href="/portal/login" variant="primary">
+              Candidate Portal
+            </Button>
             <Button href="/staff/login" variant="secondary">
               Staff EMS
             </Button>

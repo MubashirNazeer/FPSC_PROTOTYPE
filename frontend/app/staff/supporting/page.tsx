@@ -4,15 +4,16 @@ import { useEffect, useState } from "react";
 
 import { DataTable } from "@/components/DataTable";
 import { StaffShell } from "@/components/StaffShell";
-import { StatusBadge } from "@/components/StatusBadge";
 import { useAuthGuard } from "@/lib/auth";
 import { apiGet } from "@/lib/api";
 
 type Duty = {
   id: number;
-  title?: string;
-  status: string;
-  assignee?: { username?: string };
+  exam_date?: string;
+  role?: string;
+  shift?: number;
+  staff_name?: string;
+  centre_name?: string;
 };
 
 type InventoryItem = {
@@ -58,17 +59,11 @@ export default function StaffSupportingPage() {
             rows={duties}
             getRowKey={(r) => r.id}
             columns={[
-              { key: "title", header: "Duty" },
-              {
-                key: "assignee",
-                header: "Assignee",
-                render: (r) => r.assignee?.username || "—",
-              },
-              {
-                key: "status",
-                header: "Status",
-                render: (r) => <StatusBadge status={r.status} />,
-              },
+              { key: "exam_date", header: "Exam date" },
+              { key: "centre_name", header: "Centre" },
+              { key: "staff_name", header: "Staff" },
+              { key: "role", header: "Role" },
+              { key: "shift", header: "Shift" },
             ]}
           />
         </div>

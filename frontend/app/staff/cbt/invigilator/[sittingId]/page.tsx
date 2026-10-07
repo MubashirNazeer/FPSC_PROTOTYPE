@@ -10,7 +10,7 @@ import { useAuthGuard } from "@/lib/auth";
 import { apiGet } from "@/lib/api";
 
 type InvigilatorPayload = {
-  sitting?: { code?: string; status?: string };
+  sitting?: { title?: string; status?: string };
   counts?: {
     total?: number;
     in_progress?: number;
@@ -19,8 +19,8 @@ type InvigilatorPayload = {
   };
   sessions?: Array<{
     id: number;
-    status: string;
-    candidate?: { username?: string };
+    status?: string;
+    candidate_name?: string;
     terminal_id?: string;
   }>;
 };
@@ -36,7 +36,7 @@ export default function InvigilatorBoardPage() {
   useEffect(() => {
     if (!user) return;
     apiGet<InvigilatorPayload>(`/cbt/sittings/${params.sittingId}/invigilator/`)
-      .then((res) => setData(res.data))
+      .then((res) => setData(res.data ?? null))
       .catch(() => setData(null));
   }, [user, params.sittingId]);
 
@@ -48,10 +48,8 @@ export default function InvigilatorBoardPage() {
     <StaffShell userLabel={user?.username}>
       <h1 className="page-title">Invigilator board</h1>
       <p className="page-lead">
-        Sitting {data?.sitting?.code || params.sittingId} ·{" "}
-        {data?.sitting?.status ? (
-          <StatusBadge status={data.sitting.status} />
-        ) : null}
+        {data?.sitting?.title || `Sitting #${params.sittingId}`} ·{" "}
+        <StatusBadge status={data?.sitting?.status} />
       </p>
       <div className="grid-2" style={{ marginBottom: "1rem" }}>
         <div className="card">
@@ -74,14 +72,19 @@ export default function InvigilatorBoardPage() {
       <DataTable
         rows={sessions}
         getRowKey={(r) => r.id}
+        emptyMessage="No candidate sessions enrolled for this sitting."
         columns={[
           { key: "id", header: "Session" },
           {
-            key: "candidate",
+            key: "candidate_name",
             header: "Candidate",
-            render: (r) => r.candidate?.username || "—",
+            render: (r) => r.candidate_name || "—",
           },
-          { key: "terminal_id", header: "Terminal" },
+          {
+            key: "terminal_id",
+            header: "Terminal",
+            render: (r) => r.terminal_id || "—",
+          },
           {
             key: "status",
             header: "Status",

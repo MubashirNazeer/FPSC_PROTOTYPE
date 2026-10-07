@@ -14,22 +14,41 @@ type Application = {
   id: number;
   status: string;
   fee_paid?: boolean;
-  advertisement?: { id?: number; title?: string };
+  tracking_id?: string;
+  advertisement_title?: string;
+  advertisement_ref?: string;
+  advertisement_close_date?: string | null;
+  post_title?: string;
 };
+
+function formatDate(value?: string | null): string {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("en-PK", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 export default function PortalApplicationsPage() {
   const { user, loading } = useAuthGuard({ redirectTo: "/portal/login" });
   const [rows, setRows] = useState<Application[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user) return;
+  const load = () => {
     apiGet<Application[] | { results: Application[] }>("/applications/")
       .then((res) => {
         const data = res.data;
         setRows(Array.isArray(data) ? data : data.results ?? []);
       })
       .catch(() => setRows([]));
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    load();
   }, [user]);
 
   async function payFee(id: number) {
@@ -37,9 +56,7 @@ export default function PortalApplicationsPage() {
     try {
       await apiPost(`/applications/${id}/pay/`, {});
       setMsg("Fee payment recorded.");
-      const res = await apiGet<Application[] | { results: Application[] }>("/applications/");
-      const data = res.data;
-      setRows(Array.isArray(data) ? data : data.results ?? []);
+      load();
     } catch (err) {
       setMsg(err instanceof Error ? err.message : "Payment failed.");
     }
@@ -61,12 +78,36 @@ export default function PortalApplicationsPage() {
         <DataTable<Application>
           rows={rows}
           getRowKey={(r) => r.id}
+          emptyMessage="You have no applications yet."
           columns={[
-            { key: "id", header: "ID" },
             {
-              key: "title",
+              key: "tracking_id",
+              header: "Tracking ID",
+              render: (r) => r.tracking_id || `#${r.id}`,
+            },
+            {
+              key: "advertisement_title",
               header: "Advertisement",
-              render: (r) => r.advertisement?.title || "—",
+              render: (r) => (
+                <div>
+                  <strong>{r.advertisement_title || "—"}</strong>
+                  {r.advertisement_ref ? (
+                    <div className="muted" style={{ fontSize: "0.85rem" }}>
+                      {r.advertisement_ref}
+                    </div>
+                  ) : null}
+                  {r.post_title ? (
+                    <div className="muted" style={{ fontSize: "0.85rem" }}>
+                      Post: {r.post_title}
+                    </div>
+                  ) : null}
+                </div>
+              ),
+            },
+            {
+              key: "advertisement_close_date",
+              header: "Last date to apply",
+              render: (r) => formatDate(r.advertisement_close_date),
             },
             {
               key: "status",

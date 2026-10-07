@@ -11,7 +11,8 @@ import { apiGet } from "@/lib/api";
 type Application = {
   id: number;
   status: string;
-  advertisement?: { title?: string };
+  advertisement_title?: string;
+  advertisement_close_date?: string | null;
 };
 
 export default function PortalDashboardPage() {
@@ -76,7 +77,10 @@ export default function PortalDashboardPage() {
               <ul>
                 {apps.slice(0, 5).map((a) => (
                   <li key={a.id}>
-                    {a.advertisement?.title || `Application #${a.id}`} — {a.status}
+                    {a.advertisement_title || `Application #${a.id}`} — {a.status}
+                    {a.advertisement_close_date
+                      ? ` (closes ${new Date(a.advertisement_close_date).toLocaleDateString()})`
+                      : ""}
                   </li>
                 ))}
               </ul>

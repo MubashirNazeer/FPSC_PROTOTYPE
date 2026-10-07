@@ -37,6 +37,13 @@ class ApplicationSerializer(serializers.ModelSerializer):
     advertisement_title = serializers.CharField(
         source="advertisement.title", read_only=True
     )
+    advertisement_ref = serializers.CharField(
+        source="advertisement.ref_number", read_only=True
+    )
+    advertisement_close_date = serializers.DateField(
+        source="advertisement.close_date", read_only=True
+    )
+    post_title = serializers.SerializerMethodField()
 
     class Meta:
         model = Application
@@ -53,6 +60,11 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     def get_candidate_name(self, obj):
         return obj.candidate.get_full_name() or obj.candidate.username
+
+    def get_post_title(self, obj):
+        if obj.requisition_id and obj.requisition:
+            return obj.requisition.post_title
+        return ""
 
 
 class AdmitCardSerializer(serializers.ModelSerializer):

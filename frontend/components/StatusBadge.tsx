@@ -12,18 +12,34 @@ const STATUS_MAP: Record<string, string> = {
   ACTIVE: "success",
   CLOSED: "neutral",
   FEE_PENDING: "warn",
+  FEE_PAID: "info",
   UNDER_SCRUTINY: "info",
   ADMIT_ISSUED: "success",
+  PUBLISHED: "success",
+  ELIGIBLE: "success",
+  SHORTLISTED: "success",
+  NOMINATED: "success",
+  SCHEDULED: "info",
+  UNDER_RR: "warn",
+  COMMISSION: "info",
+  SYLLABUS: "info",
+  ADVERTISED: "success",
+  APPLICATIONS: "info",
+  PRE_EXAM: "info",
+  EXAM: "info",
+  RESULT: "success",
+  SCRUTINY: "warn",
+  NOMINATION: "success",
 };
 
 type Props = {
-  status: string;
+  status?: string | null;
 };
 
 export function StatusBadge({ status }: Props) {
-  const tone = STATUS_MAP[status] || "neutral";
-  const label = status.replace(/_/g, " ");
-  return (
-    <span className={`${styles.badge} ${styles[tone]}`}>{label}</span>
-  );
+  const raw = (status ?? "").toString().trim();
+  const key = raw || "UNKNOWN";
+  const tone = STATUS_MAP[key] || "neutral";
+  const label = raw ? raw.replace(/_/g, " ") : "—";
+  return <span className={`${styles.badge} ${styles[tone]}`}>{label}</span>;
 }
