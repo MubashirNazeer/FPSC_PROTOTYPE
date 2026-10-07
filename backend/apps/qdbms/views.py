@@ -67,8 +67,11 @@ class QuestionViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         ser = self.get_serializer(instance, data=request.data, partial=partial)
         ser.is_valid(raise_exception=True)
-        snapshot_question(instance, request.user)
-        instance.version += 1
+        # Status-only patches (e.g. retire) skip full version snapshot noise.
+        status_only = set(ser.validated_data.keys()) <= {"status"}
+        if not status_only:
+            snapshot_question(instance, request.user)
+            instance.version += 1
         obj = ser.save()
         return success_response(self.get_serializer(obj).data, "Updated")
 

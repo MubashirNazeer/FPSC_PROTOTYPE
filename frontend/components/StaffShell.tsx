@@ -11,13 +11,13 @@ import styles from "./StaffShell.module.css";
 
 const NAV = [
   { href: "/staff", label: "Dashboard" },
-  { href: "/staff/gr", label: "GR — Requisitions" },
-  { href: "/staff/ce", label: "CE Cycles" },
-  { href: "/staff/uem", label: "UEM Exams" },
-  { href: "/staff/qdb", label: "Question Bank" },
-  { href: "/staff/cbt", label: "CBT Sittings" },
-  { href: "/staff/supporting", label: "Supporting Services" },
-  { href: "/staff/cms", label: "CMS — News & Pages" },
+  { href: "/staff/gr", label: "GR Management" },
+  { href: "/staff/ce", label: "CE Management" },
+  { href: "/staff/uem", label: "UEM Management" },
+  { href: "/staff/qdb", label: "QDBMS Management" },
+  { href: "/staff/cbt", label: "CBT Management" },
+  { href: "/staff/supporting", label: "Supporting Mgmt" },
+  { href: "/staff/cms", label: "CMS Management" },
 ];
 
 type Props = {
