@@ -1,7 +1,5 @@
-# ---- deps + build (same stage so .bin/next is always present) ----
-FROM node:20-alpine AS builder
-
-RUN apk add --no-cache libc6-compat
+# Debian-based Node (more reliable than Alpine for Next standalone on some VMs)
+FROM node:20-bookworm-slim AS builder
 
 WORKDIR /app
 
@@ -14,12 +12,10 @@ ARG NEXT_PUBLIC_API_URL=
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_TELEMETRY_DISABLED=1
 
-RUN npx next build
+# Use local binary — avoid `npx` (it hits registry.npmjs.org and fails on flaky DNS)
+RUN ./node_modules/.bin/next build
 
-# ---- production runner ----
-FROM node:20-alpine AS runner
-
-RUN apk add --no-cache libc6-compat
+FROM node:20-bookworm-slim AS runner
 
 WORKDIR /app
 
@@ -29,8 +25,8 @@ ENV NODE_ENV=production \
     HOSTNAME=0.0.0.0 \
     API_INTERNAL_URL=http://backend:8000
 
-RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs \
+    && useradd --system --uid 1001 --gid nodejs nextjs
 
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
