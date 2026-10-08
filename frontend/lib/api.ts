@@ -1,21 +1,27 @@
 import { toast } from "./toast";
 
 /**
- * Resolve API base from the page host so LAN access works:
- * http://192.168.x.x:3000 → http://192.168.x.x:8000/api/v1
+ * Browser: same-origin `/api/v1` (Next rewrites → Django).
+ * Server/SSR: API_INTERNAL_URL (Docker) or localhost.
+ * Override with NEXT_PUBLIC_API_URL if needed.
  */
 export function getApiBase(): string {
+  if (typeof window !== "undefined") {
+    if (process.env.NEXT_PUBLIC_API_URL) {
+      return process.env.NEXT_PUBLIC_API_URL;
+    }
+    return "/api/v1";
+  }
+  if (process.env.API_INTERNAL_URL) {
+    return `${process.env.API_INTERNAL_URL}/api/v1`;
+  }
   if (process.env.NEXT_PUBLIC_API_URL) {
     return process.env.NEXT_PUBLIC_API_URL;
-  }
-  if (typeof window !== "undefined") {
-    const { protocol, hostname } = window.location;
-    return `${protocol}//${hostname}:8000/api/v1`;
   }
   return "http://127.0.0.1:8000/api/v1";
 }
 
-/** @deprecated Prefer getApiBase() — kept for server-api imports */
+/** Prefer getApiBase() — static default for rare SSR imports */
 export const API_BASE = "http://127.0.0.1:8000/api/v1";
 
 export type ApiEnvelope<T = unknown> = {

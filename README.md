@@ -1,45 +1,34 @@
 # FPSC Digitalization ERP — MVP
 
-Full-stack prototype aligned to **RFP FPSC/PISC/SW/2026/01** (Software Development Services for Digitalization of In-House Processes and Automation of Examination System of FPSC).
+Full-stack prototype aligned to **RFP FPSC/PISC/SW/2026/01**.
 
-## Stack
+## Docker (recommended)
 
-| Layer | Technology |
-|-------|------------|
-| Backend | Django 5 + DRF, SimpleJWT, Celery, PostgreSQL (SQLite for local demo) |
-| Frontend | Next.js 14 (App Router) + TypeScript |
-| Integrations | Mock NADRA / Payment / SMS adapters |
+Clone, then:
 
-## Quick start (local)
-
-### Backend
-
-```powershell
-cd FPSC_PROTOTYPE
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r backend\requirements.txt
-cd backend
-python manage.py migrate
-python manage.py seed_demo
-python manage.py runserver 8000
+```bash
+docker compose up --build
 ```
 
-API docs: http://localhost:8000/api/docs/
+| Surface | URL |
+|---------|-----|
+| **Frontend** | http://localhost:8888 |
+| Staff login | http://localhost:8888/staff/login |
+| Candidate portal | http://localhost:8888/portal/login |
+| API docs | http://localhost:8000/api/docs/ |
 
-### Frontend
+LAN access: use your machine IP, e.g. `http://192.168.x.x:8888` (API is proxied through the frontend).
 
-```powershell
-cd frontend
-npm install
-npm run dev
+Stop:
+
+```bash
+docker compose down
 ```
 
-App: http://localhost:3000
+Reset DB + reseed:
 
-### Docker (optional)
-
-```powershell
+```bash
+docker compose down -v
 docker compose up --build
 ```
 
@@ -50,39 +39,43 @@ Password for all users: **`Fpsc@2026`**
 | Username | Role |
 |----------|------|
 | `admin` | Superuser / IT |
-| `ts.officer` | T&S |
 | `rr.officer` | R&R |
-| `commission` | Commission |
 | `secrecy` | Secrecy |
 | `ce.officer` | CE Wing |
-| `author` / `reviewer` / `approver` | QDBMS |
 | `invigilator` | CBT invigilator |
 | `candidate1` / `candidate2` | Candidates |
 
+## Local (without Docker)
+
+### Backend
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r backend\requirements.txt
+cd backend
+python manage.py migrate
+python manage.py seed_demo
+python manage.py runserver 8000
+```
+
+### Frontend
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+Default local frontend: http://localhost:3000 (API rewrites to `:8000`).
+
 ## Surfaces
 
-- **Public website** `/` — brand, notices, ads
-- **Candidate portal** `/portal/*` — register, apply, pay fee, admit card
-- **Staff EMS** `/staff/*` — GR, CE, UEM, QDB, CBT, Supporting, CMS
-- **CBT exam** `/cbt/exam/[sessionId]` — timed exam + invigilator board
-
-## Seeded demo path
-
-1. Login as `candidate1` → Portal → Applications → Admit card  
-2. Login as `admin` → Staff dashboard → GR requisitions → Advance  
-3. Staff → QDB → papers → dual authorize (secrecy + approver already done in seed)  
-4. Staff → CBT → open invigilator board for live sitting  
-5. Login as `candidate1` → CBT → start enrolled session  
+- **Public website** `/`
+- **Candidate portal** `/portal/*`
+- **Staff EMS** `/staff/*`
+- **CBT exam** `/cbt/exam/[sessionId]`
 
 ## RFP mapping
 
-See [docs/RFP_TRACEABILITY.md](docs/RFP_TRACEABILITY.md).
-
-## Project layout
-
-```
-backend/     Django project + domain apps
-frontend/    Next.js multi-surface UI
-docs/        Traceability & notes
-docker-compose.yml
-```
+See [docs/RFP_TRACEABILITY.md](docs/RFP_TRACEABILITY.md) and [docs/MOM_FPSC_MVP.md](docs/MOM_FPSC_MVP.md).

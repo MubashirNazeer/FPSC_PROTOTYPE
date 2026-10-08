@@ -1,8 +1,8 @@
-import { API_BASE, type ApiEnvelope } from "@/lib/api";
+import { getApiBase, type ApiEnvelope } from "@/lib/api";
 
 export async function fetchPublic<T>(path: string): Promise<T | null> {
   try {
-    const res = await fetch(`${API_BASE}${path}`, {
+    const res = await fetch(`${getApiBase()}${path}`, {
       next: { revalidate: 120 },
     });
     if (!res.ok) return null;

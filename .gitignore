@@ -14,3 +14,6 @@ frontend/.next/
 _rfp_extract.txt
 .idea/
 .vscode/
+# .env
+*.pdf
+

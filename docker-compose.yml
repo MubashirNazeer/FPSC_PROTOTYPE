@@ -5,64 +5,64 @@ services:
       POSTGRES_DB: fpsc
       POSTGRES_USER: fpsc
       POSTGRES_PASSWORD: fpsc_dev
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fpsc -d fpsc"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
 
   backend:
     build: ./backend
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py seed_demo &&
-             python manage.py runserver 0.0.0.0:8000"
-    volumes:
-      - ./backend:/app
-      - media_data:/app/media
+    restart: unless-stopped
     ports:
       - "8000:8000"
     environment:
-      DJANGO_SECRET_KEY: fpsc-dev-secret-change-in-production
-      DJANGO_DEBUG: "1"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-fpsc-dev-secret-change-in-production}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
       DATABASE_URL: postgres://fpsc:fpsc_dev@db:5432/fpsc
       REDIS_URL: redis://redis:6379/0
-      CORS_ALLOWED_ORIGINS: http://localhost:3000
-    depends_on:
-      - db
-      - redis
-
-  celery:
-    build: ./backend
-    command: celery -A config worker -l info
+      CELERY_TASK_ALWAYS_EAGER: "1"
+      CORS_ALLOW_ALL: "1"
+      CORS_ALLOWED_ORIGINS: http://localhost:8888,http://127.0.0.1:8888
+      RUN_SEED: ${RUN_SEED:-1}
     volumes:
-      - ./backend:/app
-    environment:
-      DJANGO_SECRET_KEY: fpsc-dev-secret-change-in-production
-      DATABASE_URL: postgres://fpsc:fpsc_dev@db:5432/fpsc
-      REDIS_URL: redis://redis:6379/0
+      - media_data:/app/media
+      - static_data:/app/staticfiles
     depends_on:
-      - db
-      - redis
-      - backend
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   frontend:
-    build: ./frontend
-    command: npm run dev -- -H 0.0.0.0
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    build:
+      context: ./frontend
+      args:
+        # Browser uses same-origin /api/v1 (rewritten to backend). Leave empty.
+        NEXT_PUBLIC_API_URL: ""
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "8888:8888"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      PORT: "8888"
+      HOSTNAME: "0.0.0.0"
+      API_INTERNAL_URL: http://backend:8000
+      # Empty = browser uses relative /api/v1 (works on localhost and LAN IP)
+      NEXT_PUBLIC_API_URL: ""
     depends_on:
       - backend
 
 volumes:
   pgdata:
   media_data:
+  static_data:
