@@ -1,13 +1,17 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/Button";
 import { DataTable } from "@/components/DataTable";
+import { PageHeader } from "@/components/PageHeader";
+import { PhaseRail } from "@/components/PhaseRail";
 import { StaffShell } from "@/components/StaffShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuthGuard } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api";
+import { GR_PHASES, grStatusToPhase } from "@/lib/grPhases";
 
 import styles from "../mgmt.module.css";
 
@@ -77,14 +81,45 @@ type Tab =
   | "hearings"
   | "attendance";
 
+const VALID_TABS: Tab[] = [
+  "requisitions",
+  "ads",
+  "applications",
+  "appeals",
+  "hearings",
+  "attendance",
+];
+
 export default function StaffGrPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "2rem" }}>Loading…</div>}>
+      <StaffGrInner />
+    </Suspense>
+  );
+}
+
+function StaffGrInner() {
   const { user, loading } = useAuthGuard({
     requireStaff: true,
     redirectTo: "/staff/login",
   });
-  const [tab, setTab] = useState<Tab>("requisitions");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const tabParam = searchParams.get("tab") as Tab | null;
+  const [tab, setTab] = useState<Tab>(
+    tabParam && VALID_TABS.includes(tabParam) ? tabParam : "requisitions"
+  );
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (tabParam && VALID_TABS.includes(tabParam)) setTab(tabParam);
+  }, [tabParam]);
+
+  function goTab(next: Tab) {
+    setTab(next);
+    router.replace(`/staff/gr?tab=${next}`);
+  }
   const [reqs, setReqs] = useState<Requisition[]>([]);
   const [ads, setAds] = useState<Advertisement[]>([]);
   const [apps, setApps] = useState<Application[]>([]);
@@ -346,30 +381,44 @@ export default function StaffGrPage() {
 
   return (
     <StaffShell userLabel={user?.username}>
-      <h1 className="page-title">GR — General Recruitment Management</h1>
-      <p className={styles.help}>
-        Requisition → advertisement → applications → scrutiny → appeals /
-        hearings → attendance / admit cards (RFP Module 1).
-      </p>
+      <PageHeader
+        title="General Recruitment"
+        lead="Every requisition from receipt to nomination, with its current phase and owning wing."
+        refs={["GR-1.1 … GR-1.13"]}
+      />
+      <div className="card" style={{ marginBottom: "1rem" }}>
+        <h3 style={{ margin: "0 0 0.5rem", fontSize: "0.95rem" }}>
+          Lifecycle phases
+        </h3>
+        <PhaseRail phase={-1} labeled />
+        <div className={styles.legend}>
+          {GR_PHASES.map((g) => (
+            <span key={g.key}>
+              <i />
+              {g.label} ({g.wing})
+            </span>
+          ))}
+        </div>
+      </div>
       {msg ? <div className="alert alert-success">{msg}</div> : null}
       {err ? <div className="alert alert-error">{err}</div> : null}
 
       <div className={styles.tabs}>
         {(
           [
-            ["requisitions", "Requisitions"],
-            ["ads", "Advertisements"],
-            ["applications", "Applications"],
-            ["appeals", "Appeals"],
+            ["requisitions", "1–2 Requisition / syllabus"],
+            ["ads", "3 Advertisement"],
+            ["applications", "4–7 Applications / scrutiny"],
+            ["appeals", "Grievances"],
             ["hearings", "Hearings"],
-            ["attendance", "Attendance"],
+            ["attendance", "5 Test attendance"],
           ] as const
         ).map(([key, label]) => (
           <button
             key={key}
             type="button"
             className={tab === key ? styles.tabActive : styles.tab}
-            onClick={() => setTab(key)}
+            onClick={() => goTab(key)}
           >
             {label}
           </button>
@@ -481,9 +530,24 @@ export default function StaffGrPage() {
                   render: (r) => String(r.bps ?? "—"),
                 },
                 {
+                  key: "lifecycle",
+                  header: "Lifecycle",
+                  render: (r) => (
+                    <PhaseRail phase={grStatusToPhase(r.status)} compact />
+                  ),
+                },
+                {
                   key: "status",
-                  header: "Status",
-                  render: (r) => <StatusBadge status={r.status} />,
+                  header: "Phase",
+                  render: (r) => {
+                    const ph = grStatusToPhase(r.status);
+                    return (
+                      <span>
+                        {GR_PHASES[ph]?.label || r.status}{" "}
+                        <StatusBadge status={r.status} />
+                      </span>
+                    );
+                  },
                 },
                 {
                   key: "actions",
@@ -491,7 +555,7 @@ export default function StaffGrPage() {
                   render: (r) =>
                     r.status !== "CLOSED" ? (
                       <Button variant="secondary" onClick={() => advance(r.id)}>
-                        Advance phase
+                        Forward phase
                       </Button>
                     ) : (
                       "—"

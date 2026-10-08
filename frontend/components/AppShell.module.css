@@ -2,14 +2,13 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--fpsc-bg);
+  background: var(--paper);
 }
 
 .header {
-  background: #ffffff;
-  color: var(--fpsc-ink);
-  border-bottom: 1px solid var(--fpsc-border);
-  box-shadow: 0 1px 0 rgba(16, 24, 40, 0.03);
+  background: var(--surface);
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
   position: sticky;
   top: 0;
   z-index: 40;
@@ -28,24 +27,26 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: var(--fpsc-ink);
+  color: var(--ink);
   text-decoration: none !important;
 }
 
 .brand:hover {
-  color: var(--fpsc-ink);
+  color: var(--ink);
+  text-decoration: none !important;
 }
 
 .brand strong {
   display: block;
-  font-family: var(--font-display);
+  font-family: var(--font-serif);
   font-size: 1rem;
-  color: var(--fpsc-green-dark);
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .brand small {
   display: block;
-  color: var(--fpsc-muted);
+  color: var(--muted);
   font-size: 0.78rem;
 }
 
@@ -53,14 +54,15 @@
   width: 2.55rem;
   height: 2.55rem;
   border-radius: 50%;
-  border: 2px solid var(--fpsc-green);
-  background: var(--fpsc-green-soft);
+  border: 2px solid var(--brass);
+  background: transparent;
   display: grid;
   place-items: center;
-  font-family: var(--font-display);
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 0.72rem;
-  color: var(--fpsc-green-dark);
+  color: var(--brass-soft);
+  background: var(--pine);
 }
 
 .nav {
@@ -71,17 +73,19 @@
 }
 
 .nav a:not([class*="btn"]) {
-  color: var(--fpsc-ink);
-  font-weight: 600;
-  font-size: 0.92rem;
+  color: var(--ink);
+  font-weight: 500;
+  font-size: 0.875rem;
   padding: 0.4rem 0.55rem;
   border-radius: 6px;
   text-decoration: none !important;
+  transition: background 0.15s ease;
 }
 
 .nav a:not([class*="btn"]):hover {
-  color: var(--fpsc-green);
-  background: var(--fpsc-green-soft);
+  background: var(--surface2);
+  color: var(--ink);
+  text-decoration: none !important;
 }
 
 .main {
@@ -90,13 +94,17 @@
 }
 
 .footer {
-  background: #ffffff;
-  color: var(--fpsc-muted);
-  border-top: 1px solid var(--fpsc-border);
+  background: var(--surface);
+  color: var(--muted);
+  border-top: 1px solid var(--line);
   padding: 1.1rem 0;
   font-size: 0.85rem;
 }
 
 .footer p {
   margin: 0;
+}
+
+.footer a {
+  color: var(--pine2);
 }

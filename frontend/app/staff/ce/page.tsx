@@ -4,12 +4,25 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/Button";
 import { DataTable } from "@/components/DataTable";
+import { PageHeader } from "@/components/PageHeader";
 import { StaffShell } from "@/components/StaffShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuthGuard } from "@/lib/auth";
 import { apiGet, apiPatch, apiPost } from "@/lib/api";
 
 import styles from "../mgmt.module.css";
+
+const CE_STAGES = [
+  "Paper preparation",
+  "MPT advertisement",
+  "MPT applications",
+  "MPT exam",
+  "Written exam",
+  "Psychological assessment",
+  "Medical",
+  "Viva voce",
+  "Group allocation",
+];
 
 type CeCycle = {
   id: number;
@@ -223,13 +236,52 @@ export default function StaffCePage() {
     </option>
   ));
 
+  const activePhase = rows[0]?.phase || "PAPER_PREP";
+  const phaseOrder = [
+    "PAPER_PREP",
+    "MPT_AD",
+    "MPT_APPS",
+    "MPT_EXAM",
+    "WRITTEN",
+    "PSYCH",
+    "MEDICAL",
+    "VIVA",
+    "ALLOCATION",
+    "CLOSED",
+  ];
+  const activeIdx = Math.max(0, phaseOrder.indexOf(activePhase));
+
   return (
     <StaffShell userLabel={user?.username}>
-      <h1 className="page-title">CE — Competitive Examination Management</h1>
-      <p className={styles.help}>
-        CSS lifecycle: paper prep → MPT → written → psych/medical/viva → group
-        allocation (RFP Module 2).
-      </p>
+      <PageHeader
+        title="CSS Competitive Examination"
+        lead="MPT through group allocation for the CSS cycle, with psych, medical, viva and quota-wise vacancy placement."
+        refs={["CE-2.1 … CE-2.10"]}
+      />
+      <div className="card" style={{ marginBottom: "1rem" }}>
+        <h3 style={{ margin: "0 0 0.5rem", fontSize: "0.95rem" }}>
+          Stage status
+        </h3>
+        <ul className={styles.steps}>
+          {CE_STAGES.map((label, i) => {
+            const done = i < activeIdx;
+            const run = i === activeIdx && activePhase !== "CLOSED";
+            return (
+              <li
+                key={label}
+                className={
+                  done ? styles.stepOk : run ? styles.stepRun : undefined
+                }
+              >
+                <span className={styles.stepIc}>
+                  {done ? "✓" : run ? "…" : ""}
+                </span>
+                <div>{label}</div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
       {msg ? <div className="alert alert-success">{msg}</div> : null}
       {err ? <div className="alert alert-error">{err}</div> : null}
 

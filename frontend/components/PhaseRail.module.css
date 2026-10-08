@@ -1,0 +1,83 @@
+.rail,
+.railCompact {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  min-width: 140px;
+}
+
+.railCompact {
+  min-width: 120px;
+}
+
+.rail span,
+.railCompact span {
+  height: 8px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--line);
+  min-width: 8px;
+  transition: height 0.12s ease, opacity 0.12s ease, background 0.12s ease;
+  cursor: help;
+}
+
+.rail span.done,
+.railCompact span.done {
+  background: var(--pine3);
+  opacity: 0.55;
+}
+
+.rail span.cur,
+.railCompact span.cur {
+  background: var(--pine3);
+  height: 12px;
+  opacity: 1;
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px var(--pine3);
+}
+
+.railBig {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 6px;
+  margin: 6px 0 4px;
+}
+
+.st {
+  border-top: 5px solid var(--line);
+  padding-top: 8px;
+  font-size: 0.75rem;
+  min-width: 0;
+}
+
+.st b {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+.st small {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+.stDone {
+  opacity: 0.6;
+  border-top-color: var(--pine3);
+}
+
+.stCur {
+  border-top-color: var(--pine3);
+}
+
+.stCur b {
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .railBig {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/Button";
 import { DataTable } from "@/components/DataTable";
+import { PageHeader } from "@/components/PageHeader";
 import { StaffShell } from "@/components/StaffShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuthGuard } from "@/lib/auth";
@@ -150,7 +151,11 @@ export default function StaffCbtPage() {
 
   return (
     <StaffShell userLabel={user?.username}>
-      <h1 className="page-title">CBT — Examination Management</h1>
+      <PageHeader
+        title="CBT sites & live exam"
+        lead="Sitting readiness, invigilator console, biometric check-in (mocked) and session control."
+        refs={["CBT-5.14 … CBT-5.25"]}
+      />
       <p className={styles.help}>
         Create sittings from approved papers, enroll candidates, go live, and
         monitor via invigilator board (RFP Module 5B).

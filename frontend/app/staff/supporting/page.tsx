@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/Button";
 import { DataTable } from "@/components/DataTable";
+import { PageHeader } from "@/components/PageHeader";
 import { StaffShell } from "@/components/StaffShell";
 import { useAuthGuard } from "@/lib/auth";
 import { apiGet, apiPost } from "@/lib/api";
@@ -157,7 +158,11 @@ export default function StaffSupportingPage() {
 
   return (
     <StaffShell userLabel={user?.username}>
-      <h1 className="page-title">Supporting Module Management</h1>
+      <PageHeader
+        title="Duty, inventory & transport"
+        lead="Supporting operations for exam logistics — duties, assets, vehicles, leave and library."
+        refs={["SUP-6.1 … SUP-6.7"]}
+      />
       <p className={styles.help}>
         Duty deployment, inventory issue/return, and transport register (RFP
         Module 6).

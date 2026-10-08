@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Button } from "./Button";
+import { ToastHost } from "./ToastHost";
 import styles from "./AppShell.module.css";
 
 type Props = {
@@ -36,6 +37,7 @@ export function AppShell({ children }: Props) {
         </div>
       </header>
       <main className={styles.main}>{children}</main>
+      <ToastHost />
       <footer className={styles.footer}>
         <div className="container" style={{ display: "grid", gap: "0.5rem" }}>
           <p>

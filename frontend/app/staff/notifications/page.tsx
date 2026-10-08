@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/Button";
 import { DataTable } from "@/components/DataTable";
+import { PageHeader } from "@/components/PageHeader";
 import { StaffShell } from "@/components/StaffShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuthGuard } from "@/lib/auth";
@@ -88,12 +89,11 @@ export default function StaffNotificationsPage() {
 
   return (
     <StaffShell userLabel={user?.username}>
-      <h1 className="page-title">Notifications — Templates & Outbox</h1>
-      <p className={styles.help}>
-        Configurable email/SMS templates with placeholders {"{name}"},{" "}
-        {"{tracking_id}"}, {"{exam}"} (RFP CC-02). Gateway delivery is mocked;
-        messages land in the outbox.
-      </p>
+      <PageHeader
+        title="Notifications & eCase alerts"
+        lead="Configurable email/SMS templates with placeholders {name}, {tracking_id}, {exam}. Gateway delivery is mocked; messages land in the outbox."
+        refs={["CC-02", "MOB-04"]}
+      />
       {msg ? <div className="alert alert-success">{msg}</div> : null}
       {err ? <div className="alert alert-error">{err}</div> : null}
 

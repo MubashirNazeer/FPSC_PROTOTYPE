@@ -11,6 +11,8 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
   href?: string;
   children: ReactNode;
+  loading?: boolean;
+  title?: string;
 };
 
 export function Button({
@@ -18,19 +20,34 @@ export function Button({
   href,
   className = "",
   children,
+  loading = false,
+  disabled,
+  title,
   ...rest
 }: Props) {
-  const cls = `${styles.btn} ${styles[variant]} ${className}`.trim();
+  const cls =
+    `${styles.btn} ${styles[variant]} ${loading ? styles.loading : ""} ${className}`.trim();
+  const tip = title;
+
   if (href) {
     return (
-      <Link href={href} className={cls}>
+      <Link href={href} className={cls} title={tip} aria-busy={loading || undefined}>
+        {loading ? <span className={styles.spinner} aria-hidden /> : null}
         {children}
       </Link>
     );
   }
   return (
-    <button type={rest.type ?? "button"} className={cls} {...rest}>
-      {children}
+    <button
+      type={rest.type ?? "button"}
+      className={cls}
+      disabled={disabled || loading}
+      title={tip}
+      aria-busy={loading || undefined}
+      {...rest}
+    >
+      {loading ? <span className={styles.spinner} aria-hidden /> : null}
+      {loading ? "Working…" : children}
     </button>
   );
 }

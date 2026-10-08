@@ -1,23 +1,29 @@
 import type { Metadata } from "next";
-import { Libre_Baskerville, Source_Sans_3 } from "next/font/google";
+import { IBM_Plex_Mono, IBM_Plex_Sans, Source_Serif_4 } from "next/font/google";
 
 import "./globals.css";
 
-const display = Libre_Baskerville({
+const serif = Source_Serif_4({
   subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-display",
+  weight: ["500", "600", "700"],
+  variable: "--font-serif",
 });
 
-const ui = Source_Sans_3({
+const sans = IBM_Plex_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-  variable: "--font-ui",
+  variable: "--font-sans",
+});
+
+const mono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "Federal Public Service Commission (FPSC) — Official Digital Portal",
+    default: "FPSC Integrated ERP — Recruitment & Examination Platform",
     template: "%s | FPSC Pakistan",
   },
   description:
@@ -48,8 +54,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${display.variable} ${ui.variable}`}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={`${serif.variable} ${sans.variable} ${mono.variable}`}
+    >
+      <body className={sans.className}>{children}</body>
     </html>
   );
 }

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/Button";
 import { DataTable } from "@/components/DataTable";
+import { PageHeader } from "@/components/PageHeader";
 import { StaffShell } from "@/components/StaffShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuthGuard } from "@/lib/auth";
@@ -310,12 +311,11 @@ export default function StaffUemPage() {
 
   return (
     <StaffShell userLabel={user?.username}>
-      <h1 className="page-title">UEM — Full Unified Examination Management</h1>
-      <p className={styles.help}>
-        Covers UEM-3.1 to UEM-3.8: configurable exam types, requisitions, quota,
-        pre-exam reports, scrutiny-linked apply (portal), scheduling, marksheets,
-        merit, and intimations.
-      </p>
+      <PageHeader
+        title="Unified Examination Module"
+        lead="Define a new exam type by arranging stages — no code changes. Existing types reuse the GR and CE workflow engine."
+        refs={["UEM-3.1 … UEM-3.8"]}
+      />
       {msg ? <div className="alert alert-success">{msg}</div> : null}
       {err ? <div className="alert alert-error">{err}</div> : null}
 

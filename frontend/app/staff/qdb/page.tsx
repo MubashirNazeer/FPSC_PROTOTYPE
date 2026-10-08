@@ -1,9 +1,11 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/Button";
 import { DataTable } from "@/components/DataTable";
+import { PageHeader } from "@/components/PageHeader";
 import { StaffShell } from "@/components/StaffShell";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useAuthGuard } from "@/lib/auth";
@@ -50,11 +52,38 @@ const emptyQuestion = {
 };
 
 export default function StaffQdbPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: "2rem" }}>Loading…</div>}>
+      <StaffQdbInner />
+    </Suspense>
+  );
+}
+
+function StaffQdbInner() {
   const { user, loading } = useAuthGuard({
     requireStaff: true,
     redirectTo: "/staff/login",
   });
-  const [tab, setTab] = useState<Tab>("questions");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") as Tab | null;
+  const [tab, setTab] = useState<Tab>(
+    tabParam === "papers" ||
+      tabParam === "taxonomy" ||
+      tabParam === "blueprints"
+      ? tabParam
+      : "questions"
+  );
+
+  useEffect(() => {
+    if (
+      tabParam === "papers" ||
+      tabParam === "taxonomy" ||
+      tabParam === "blueprints" ||
+      tabParam === "questions"
+    ) {
+      setTab(tabParam);
+    }
+  }, [tabParam]);
   const [msg, setMsg] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -226,7 +255,11 @@ export default function StaffQdbPage() {
 
   return (
     <StaffShell userLabel={user?.username}>
-      <h1 className="page-title">QDBMS — Question Data Bank Management</h1>
+      <PageHeader
+        title="Question Data Bank"
+        lead="Author, review, approve questions; build blueprints and dual-authorise papers for CBT."
+        refs={["QDB-5.1 … QDB-5.12"]}
+      />
       <p className={styles.help}>
         Full question lifecycle: Author → Review → Approve → Active → Paper
         generation with dual authorization (RFP Module 5A).

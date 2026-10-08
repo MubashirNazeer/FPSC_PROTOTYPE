@@ -1,34 +1,45 @@
 .badge {
-  display: inline-block;
-  padding: 0.15rem 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
   border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
+  font-weight: 500;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .neutral {
-  background: #eceae4;
-  color: #4a4a4a;
+  background: var(--surface2);
+  color: var(--muted);
 }
 
 .info {
-  background: #e3f0ea;
-  color: #145a43;
+  background: #e1eaf5;
+  color: #2d5b9a;
 }
 
 .success {
-  background: #e2f3e6;
-  color: #1f5c32;
+  background: var(--ok-soft);
+  color: var(--ok);
 }
 
 .warn {
-  background: #faf0dc;
-  color: #7a5a12;
+  background: var(--amber-soft);
+  color: var(--amber);
 }
 
 .danger {
-  background: #fdecea;
-  color: #7a1c18;
+  background: var(--red-soft);
+  color: var(--red);
 }

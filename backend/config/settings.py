@@ -117,9 +117,14 @@ AUTH_USER_MODEL = "accounts.User"
 
 CORS_ALLOWED_ORIGINS = [
     o.strip()
-    for o in os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    for o in os.getenv(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:3000",
+    ).split(",")
     if o.strip()
 ]
+# Prototype: allow LAN IPs (http://192.168.x.x:3000) when DEBUG
+CORS_ALLOW_ALL_ORIGINS = DEBUG or os.getenv("CORS_ALLOW_ALL", "0") == "1"
 CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {

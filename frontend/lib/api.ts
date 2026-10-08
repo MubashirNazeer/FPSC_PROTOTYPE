@@ -1,11 +1,39 @@
-export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+import { toast } from "./toast";
+
+/**
+ * Resolve API base from the page host so LAN access works:
+ * http://192.168.x.x:3000 → http://192.168.x.x:8000/api/v1
+ */
+export function getApiBase(): string {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  if (typeof window !== "undefined") {
+    const { protocol, hostname } = window.location;
+    return `${protocol}//${hostname}:8000/api/v1`;
+  }
+  return "http://127.0.0.1:8000/api/v1";
+}
+
+/** @deprecated Prefer getApiBase() — kept for server-api imports */
+export const API_BASE = "http://127.0.0.1:8000/api/v1";
 
 export type ApiEnvelope<T = unknown> = {
   success: boolean;
   data: T;
   message: string;
 };
+
+type MutateOptions = {
+  auth?: boolean;
+  /** When false, skip success/error toast (default true for POST/PATCH). */
+  notify?: boolean;
+};
+
+function notifyMutation(ok: boolean, message: string, notify?: boolean): void {
+  if (notify === false || typeof window === "undefined") return;
+  toast(message || (ok ? "Saved." : "Request failed."), ok ? "ok" : "err");
+}
 
 const TOKEN_KEY = "fpsc_access_token";
 const REFRESH_KEY = "fpsc_refresh_token";
@@ -29,7 +57,7 @@ export async function loginWithPassword(
   username: string,
   password: string
 ): Promise<{ access: string; refresh: string }> {
-  const res = await fetch(`${API_BASE}/auth/token/`, {
+  const res = await fetch(`${getApiBase()}/auth/token/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ username, password }),
@@ -69,35 +97,61 @@ export async function apiGet<T>(
     options?.auth === false
       ? { "Content-Type": "application/json" }
       : authHeaders();
-  const res = await fetch(`${API_BASE}${path}`, { headers, cache: "no-store" });
+  const res = await fetch(`${getApiBase()}${path}`, {
+    headers,
+    cache: "no-store",
+  });
   return parseResponse<T>(res);
 }
 
 export async function apiPost<T>(
   path: string,
   data?: unknown,
-  options?: { auth?: boolean }
+  options?: MutateOptions
 ): Promise<ApiEnvelope<T>> {
   const headers: HeadersInit =
     options?.auth === false
       ? { "Content-Type": "application/json" }
       : authHeaders();
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers,
-    body: data !== undefined ? JSON.stringify(data) : undefined,
-  });
-  return parseResponse<T>(res);
+  try {
+    const res = await fetch(`${getApiBase()}${path}`, {
+      method: "POST",
+      headers,
+      body: data !== undefined ? JSON.stringify(data) : undefined,
+    });
+    const body = await parseResponse<T>(res);
+    notifyMutation(true, body.message || "Action completed.", options?.notify);
+    return body;
+  } catch (err) {
+    notifyMutation(
+      false,
+      err instanceof Error ? err.message : "Request failed.",
+      options?.notify
+    );
+    throw err;
+  }
 }
 
 export async function apiPatch<T>(
   path: string,
-  data?: unknown
+  data?: unknown,
+  options?: MutateOptions
 ): Promise<ApiEnvelope<T>> {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "PATCH",
-    headers: authHeaders(),
-    body: data !== undefined ? JSON.stringify(data) : undefined,
-  });
-  return parseResponse<T>(res);
+  try {
+    const res = await fetch(`${getApiBase()}${path}`, {
+      method: "PATCH",
+      headers: authHeaders(),
+      body: data !== undefined ? JSON.stringify(data) : undefined,
+    });
+    const body = await parseResponse<T>(res);
+    notifyMutation(true, body.message || "Updated.", options?.notify);
+    return body;
+  } catch (err) {
+    notifyMutation(
+      false,
+      err instanceof Error ? err.message : "Update failed.",
+      options?.notify
+    );
+    throw err;
+  }
 }
