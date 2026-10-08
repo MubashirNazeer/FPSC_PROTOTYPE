@@ -1,20 +1,28 @@
-FROM node:20-alpine AS deps
+# ---- deps + build (same stage so .bin/next is always present) ----
+FROM node:20-alpine AS builder
+
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
-COPY package.json package-lock.json* ./
+
+COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# Empty NEXT_PUBLIC_API_URL → browser uses same-origin /api/v1 (Next rewrite → backend)
-ARG NEXT_PUBLIC_API_URL=
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
 
+ARG NEXT_PUBLIC_API_URL=
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
+    NEXT_TELEMETRY_DISABLED=1
+
+RUN npx next build
+
+# ---- production runner ----
 FROM node:20-alpine AS runner
+
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
+
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=8888 \
