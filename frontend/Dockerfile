@@ -4,7 +4,9 @@ FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 
 COPY package.json package-lock.json ./
-RUN npm ci
+# Install deps and prove the Next binary exists (broken lockfiles can "succeed" without it)
+RUN npm ci --no-audit --no-fund \
+    && test -f node_modules/next/dist/bin/next
 
 COPY . .
 
@@ -12,8 +14,8 @@ ARG NEXT_PUBLIC_API_URL=
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_TELEMETRY_DISABLED=1
 
-# Use local binary — avoid `npx` (it hits registry.npmjs.org and fails on flaky DNS)
-RUN ./node_modules/.bin/next build
+# Call Next via node — avoids npx (DNS) and fragile .bin shims
+RUN node node_modules/next/dist/bin/next build
 
 FROM node:20-bookworm-slim AS runner
 
